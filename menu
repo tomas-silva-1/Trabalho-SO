@@ -1,0 +1,21 @@
+#!/bin/bash
+while : ; do
+echo "Menu:"
+echo "1. Cria pacientes" 
+echo "2. Cria médicos"
+echo "3. Stats"
+echo "4. Avalia médicos"
+echo "0. Sair"
+read com
+case $com in
+    1) ./cria_pacientes.sh;;
+    2) echo "Indique o nome, número, especialidade e e-mail do médico:"
+        read nome num esp mail
+        ./cria_medico.sh $nome $num $esp $mail;;
+    3) echo "Indique a localidade e o valor mínimo de saldo"
+        read localidade saldo
+        ./stats.sh $localidade $saldo;;
+    4) ./avalia_medicos.sh;;
+    0) break;;
+esac
+done
