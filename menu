@@ -1,6 +1,6 @@
 #!/bin/bash
 while : ; do
-echo "Menu:"
+echo "Menu Cliniq-IUL:"
 echo "1. Cria pacientes" 
 echo "2. Cria médicos"
 echo "3. Stats"
@@ -8,14 +8,29 @@ echo "4. Avalia médicos"
 echo "0. Sair"
 read com
 case $com in
-    1) ./cria_pacientes.sh;;
+    1) ./cria_pacientes.sh
+        echo "Lista de pacientes criada";;
     2) echo "Indique o nome, número, especialidade e e-mail do médico:"
-        read nome num esp mail
-        ./cria_medico.sh $nome $num $esp $mail;;
-    3) echo "Indique a localidade e o valor mínimo de saldo"
-        read localidade saldo
-        ./stats.sh $localidade $saldo;;
+    echo "Insira o nome:"
+        read nome
+        echo "Insira o numero:"
+        read num
+        echo "Insira a especialidade:"
+        read esp
+        echo "Insira o e-mail:" 
+        read mail
+        ./cria_medico.sh "$nome" $num $esp $mail;;
+    3) echo "Indique a localidade:"
+        read localidade 
+        echo "Indique o valor mínimo de saldo:"
+        read saldo
+        ./stats.sh "$localidade" $saldo;;
     4) ./avalia_medicos.sh;;
     0) break;;
+    *) echo "Essa opção é inválida;";;
 esac
+    echo "Pressione Enter para continuar"
+    read
+    clear
+    clear
 done
