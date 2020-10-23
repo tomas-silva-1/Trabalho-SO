@@ -1,12 +1,14 @@
 #!/bin/bash
-if [ $# == 2 ] ; then
+if [[ $# != 2 ]] ; then 
+    echo "Não inseriu o número correto de argumentos"    
+else 
     if [ -e pacientes.txt ] ;
         then
         if echo $1 | grep "[0-9]" ; then
             echo "A localidade que inseriu não é válida"
             else 
             echo "Numero de pacientes de(o) $1:"
-            awk -F ';' '{ print $3}' pacientes.txt | grep $1 | wc -l
+            awk -F ';' '{ print $3}' pacientes.txt | grep "$1" | wc -l
         fi
     else 
         echo "Não existem pacientes registados"    
@@ -21,6 +23,4 @@ if [ $# == 2 ] ; then
     else 
         echo "Não existem médicos registados"
     fi        
-else 
-    echo "Não inseriu o número correto de argumentos"
- fi     
+ fi
