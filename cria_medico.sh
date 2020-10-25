@@ -7,16 +7,16 @@ if [ $# == 4 ] ; then
             echo "Não inseriu um número válido"
         elif  echo $3 | grep "[0-9]" ; then
             echo "Não inseriu uma especialidade válida"
-        elif [[echo $4 =~ "[a-z0-9]+@[a-z0-9]+\.[a-z]{2,3}$"]] ; then
-            echo "Não inseriu um e-mail válido"
-        else
-            if  [ 1 != $(grep -c "$2" medicos.txt) ] ; then
+        elif  echo $4 | grep "[a-z0-9]@[a-z0-9]*\.[a-z]" ; then
+            if  [ 1 != $(grep -c "^$2$" medicos.txt) ] ; then
                 echo "$1;$2;$3;$4;0;0;0" >> medicos.txt
                 echo "  Lista de médicos: "
                 cat medicos.txt         
             else 
                 echo "Esse médico já existe"
             fi 
+        else
+            echo "Não inseriu um e-mail válido"
         fi
     else
     echo "$1;$2;$3;$4;0;0;0" > medicos.txt
@@ -26,6 +26,3 @@ if [ $# == 4 ] ; then
 else 
 echo "Não inseriu o número correto de argumentos"
 fi
-
-#|| ( echo $3 | grep "[0-9]" ) || !( echo $4 | grep "*[@]*[.]*" )
-#|| !( echo $2 | grep "[0-9]" ) ]

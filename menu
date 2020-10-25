@@ -19,14 +19,16 @@ case $com in
         read esp
         echo "Insira o e-mail:" 
         read mail
-        ./cria_medico.sh "$nome" $num $esp $mail;;
+        ./cria_medico.sh "$nome" $num "$esp" $mail;;
     3) echo "Indique a localidade:"
         read localidade 
         echo "Indique o valor mínimo de saldo:"
         read saldo
         ./stats.sh "$localidade" $saldo;;
     4) ./avalia_medicos.sh;;
-    0) break;;
+    0)clear
+      clear 
+      break;;
     *) echo "Essa opção é inválida;";;
 esac
     echo "Pressione Enter para continuar"
