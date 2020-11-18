@@ -11,7 +11,6 @@ Consulta getInfo(){
     printf("1-Normal\n2-COVID19\n3-Urgente\n");
     int n;
     scanf("%d",&n);
-
     if(tipoConsValido(n)>0){
         consulta.tipo=n;
         printf("Indique a descriçao da consulta:\n");
@@ -27,13 +26,28 @@ Consulta getInfo(){
 }
 void criaConsulta(Consulta c){
     FILE* file = fopen( "PedidoConsulta.txt", "a");
-    fprintf( file, "%d;%s;%d\n", c.tipo, c.descricao, c.pid_consulta );
+    fprintf( file, "%d %s %d\n", c.tipo, c.descricao, c.pid_consulta );
     fclose(file);
 }
+int getSrvPid(){
+    int pid;
+        FILE* file = fopen( "SrvConsultas.pid", "r");
+        fscanf(file,"%d",&pid);
+        //fgets(pid,10,file);
+        fclose(file);
+        return pid;
+}
+void sendsignal(){
+    int pid=getSrvPid();
+    kill(pid,SIGUSR1);
+    printf("chega aqui %d\n",pid);
+}
+
 int main(int argc, char const *argv[]){
 Consulta cons = getInfo();
 criaConsulta(cons);
 printf("%d   %s  %d \n",cons.tipo,cons.descricao,cons.pid_consulta);
+sendsignal();
 }
 
 

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 #ifndef __CONSULTA_H__
 #define __CONSULTA_H__
 
