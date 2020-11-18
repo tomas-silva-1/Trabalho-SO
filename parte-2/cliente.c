@@ -1,5 +1,8 @@
 #include "Consulta.h"
 
+
+Consulta cons;
+
 int tipoConsValido(int t){
     if (t==1 || t==2 || t==3 ) return 1;
     return -1;
@@ -25,29 +28,38 @@ Consulta getInfo(){
     }
 }
 void criaConsulta(Consulta c){
+    if(remove("PedidoConsulta.txt")==0);
     FILE* file = fopen( "PedidoConsulta.txt", "a");
-    fprintf( file, "%d %s %d\n", c.tipo, c.descricao, c.pid_consulta );
+    fprintf( file, "%d %s %d", c.tipo, c.descricao, c.pid_consulta );
     fclose(file);
 }
 int getSrvPid(){
     int pid;
         FILE* file = fopen( "SrvConsultas.pid", "r");
         fscanf(file,"%d",&pid);
-        //fgets(pid,10,file);
         fclose(file);
         return pid;
 }
 void sendsignal(){
     int pid=getSrvPid();
     kill(pid,SIGUSR1);
-    printf("chega aqui %d\n",pid);
+    
+}
+void trata_sinal(int sinal){
+    printf("Consulta não é possível para o processo %d\n",cons.pid_consulta);
+    kill(cons.pid_consulta,SIGKILL);
 }
 
 int main(int argc, char const *argv[]){
-Consulta cons = getInfo();
+    int n=0;
+cons = getInfo();
+signal(SIGUSR2,trata_sinal);
 criaConsulta(cons);
 printf("%d   %s  %d \n",cons.tipo,cons.descricao,cons.pid_consulta);
 sendsignal();
+while(n==0){
+    pause();
+}
 }
 
 
