@@ -23,16 +23,22 @@ void registerPID(){
     fprintf( file, "%d", pid);
     fclose(file);
 }
-/* int getNumC(Consulta c, int tipo){
-    int result;
-    if (tipo ==1 || tipo==2 || tipo==3 ){
-        result= calculateCons(c,tipo);
-        return result;
-    }else{
-        fprintf(stderr,"tipo de consulta nao valido\n");
-        exit -1;
-    }   
-} */
+void counter(int tipo){
+    switch (tipo){
+    case 1:
+        tipo1++;
+        break;
+    case 2:
+        tipo2++;
+        break;
+    case 3:
+        tipo3++;
+        break;
+    default:
+        printf("tipo de consulta nao valida");
+        break;
+    }
+}
 int calculateCons(Consulta c, int tipo){
     int total=0;
     for(int i=0;i<lista_size;i++){
@@ -45,11 +51,39 @@ void readPedidoCons(){
     int tipo;
     int pid;
     char inf[100];
+    Consulta c;
     FILE* file = fopen( "PedidoConsulta.txt", "r");
     fscanf(file,"%d %s %d",&tipo,&inf,&pid);
-    if(checksVagas(pid))
+    if(checksVagas(pid)){
          printf("Chegou novo pedido de consulta do tipo %d, descrição %s e PID %d\n",tipo,inf,pid);
-    
+        c.tipo=tipo;
+        c.pid_consulta=pid;
+        c.descricao=inf;
+        setupConsulta(c);
+    }
+}
+void setupConsulta(Consulta c){
+    for(int i=0;i<lista_size;i++){
+        if(lista_consultas[i].tipo == -1){ 
+            lista_consultas[i]=c;
+            printf("Consulta agendada para a sala %d\n",i);
+            counter(c.tipo);
+            doConsulta(c,i);
+            break;
+        }
+    }
+}
+void doConsulta(Consulta c, int sala){
+    pid_t child = fork();
+     if(child == 0){  //filho
+        kill(SIGHUP,c.pid_consulta);
+        sleep(10);
+        printf("Consulta terminada na sala %d",sala);
+        kill(SIGTERM,c.pid_consulta);
+     }else{
+         wait(NULL);
+         //pai
+     }
 }
 int checksVagas(int pid){
     if(vagas()==0){
@@ -73,6 +107,7 @@ void trata_sinal(int sinal){
     readPedidoCons();   
 }
 
+
     void test(){
         for(int i=0;i<lista_size;i++){
         Consulta c;
@@ -82,8 +117,8 @@ void trata_sinal(int sinal){
     }
 int main(int argc, char const *argv[]){
     int n=0;
-    //initializer();
-    test();
+    initializer();
+    
     registerPID();
     signal(SIGUSR1,trata_sinal);
     printf("Servidor Cliniq-IUL...\n");

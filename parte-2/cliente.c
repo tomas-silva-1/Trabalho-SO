@@ -45,21 +45,26 @@ void sendsignal(){
     kill(pid,SIGUSR1);
     
 }
-void trata_sinal(int sinal){
+void trata_sinalURS2(int sinal){
     printf("Consulta não é possível para o processo %d\n",cons.pid_consulta);
     kill(cons.pid_consulta,SIGKILL);
+}
+void trata_sinalHUP(int sinal){
+    printf("Consulta concluída para o processo %d",cons.pid_consulta);
+    remove("PedidoConsulta.txt");
 }
 
 int main(int argc, char const *argv[]){
     int n=0;
-cons = getInfo();
-signal(SIGUSR2,trata_sinal);
-criaConsulta(cons);
-printf("%d   %s  %d \n",cons.tipo,cons.descricao,cons.pid_consulta);
-sendsignal();
-while(n==0){
-    pause();
-}
+    cons = getInfo();
+    signal(SIGUSR2,trata_sinalURS2);
+    signal(SIGHUP,trata_sinalHUP);
+    criaConsulta(cons);
+    printf("%d   %s  %d \n",cons.tipo,cons.descricao,cons.pid_consulta);
+    sendsignal();
+    while(n==0){
+        pause();
+    }
 }
 
 
