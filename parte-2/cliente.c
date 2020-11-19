@@ -63,13 +63,18 @@ void trata_sinalTERM(int sinal){
     printf("Consulta concluída para o processo %d\n",cons.pid_consulta);
     termina();
 }
-
+void trata_sinalINT(int sinal){
+    printf("\nPaciente cancelou o pedido\n");
+    remove("PedidoConsulta.txt");
+    termina();
+}
 
 int main(int argc, char const *argv[]){
     cons = getInfo();
     signal(SIGUSR2,trata_sinalURS2);
     signal(SIGHUP,trata_sinalHUP);
     signal(SIGTERM,trata_sinalTERM);
+    signal(SIGINT,trata_sinalINT);
     criaConsulta(cons);
     //printf("%d   %s  %d \n",cons.tipo,cons.descricao,cons.pid_consulta);
     sendsignal();

@@ -7,6 +7,7 @@ int tipo1=0;
 int tipo2=0;
 int tipo3=0;
 int perdidas=0;
+int n=0;
 
 
 void initializer(){
@@ -101,18 +102,35 @@ void readPedidoCons(){
         setupConsulta(c);
     }
 }
+void statsConsultas(){
+    FILE* file= fopen("StatsConsultas.dat","w");
+    if ( file ) {
+        fwrite(&perdidas, sizeof(perdidas), 1, file);
+        fwrite(&tipo1,sizeof(tipo1),1,file);
+        fwrite(&tipo2,sizeof(tipo2),1,file);
+        fwrite(&tipo3,sizeof(tipo3),1,file);
+        fclose(file);       //hexdump -e '4 "%i\t" "\n"' StatsConsultas.dat
+    } else {
+        fprintf(stderr,"Erro, não foi possível abrir o ficheiro 'StatsConsultas.dat' para escrita.\n");
+    }
+
+}
 void trata_sinal(int sinal){
     readPedidoCons();   
 }
+void trata_sinalINT(int sinal){
+    remove("SrvConsultas.pid");
+    statsConsultas();
+    n=1;
 
+}
 
 int main(int argc, char const *argv[]){
-    int n=0;
     initializer();
     registerPID();
     signal(SIGUSR1,trata_sinal);
+    signal(SIGINT,trata_sinalINT);
     printf("Servidor Cliniq-IUL...\n");
-   
     while(n==0){
         pause();
     }
