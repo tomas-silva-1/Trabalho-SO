@@ -6,6 +6,8 @@
 #ifndef __CONSULTA_H__
 #define __CONSULTA_H__
 
+#define TIME 10
+#define LISTA_SIZE 10
 
 typedef struct {
  int tipo; 

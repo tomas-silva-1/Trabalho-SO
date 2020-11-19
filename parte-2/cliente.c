@@ -2,6 +2,7 @@
 
 
 Consulta cons;
+int n=0;
 
 int tipoConsValido(int t){
     if (t==1 || t==2 || t==3 ) return 1;
@@ -17,11 +18,10 @@ Consulta getInfo(){
     if(tipoConsValido(n)>0){
         consulta.tipo=n;
         printf("Indique a descriçao da consulta:\n");
-        scanf("\n%99[^\n]",&consulta.descricao);
+        scanf("%100s",&consulta.descricao);
+        //scanf("\n%99[^\n]",&consulta.descricao);
         consulta.pid_consulta=getpid();
-        
         return consulta;
-
     }else{
        fprintf(stderr,"tipo de consulta nao valido\n");
        exit -1; 
@@ -45,22 +45,33 @@ void sendsignal(){
     kill(pid,SIGUSR1);
     
 }
+void termina(){
+    printf("Terminando processo...\n");
+    sleep(1);
+    n=1;
+}
 void trata_sinalURS2(int sinal){
     printf("Consulta não é possível para o processo %d\n",cons.pid_consulta);
-    kill(cons.pid_consulta,SIGKILL);
+    termina();
 }
 void trata_sinalHUP(int sinal){
-    printf("Consulta concluída para o processo %d",cons.pid_consulta);
+    printf("Consulta iniciada para o processo %d\n",cons.pid_consulta);
+    printf("Consulta a decorrer...\n");
     remove("PedidoConsulta.txt");
 }
+void trata_sinalTERM(int sinal){
+    printf("Consulta concluída para o processo %d\n",cons.pid_consulta);
+    termina();
+}
+
 
 int main(int argc, char const *argv[]){
-    int n=0;
     cons = getInfo();
     signal(SIGUSR2,trata_sinalURS2);
     signal(SIGHUP,trata_sinalHUP);
+    signal(SIGTERM,trata_sinalTERM);
     criaConsulta(cons);
-    printf("%d   %s  %d \n",cons.tipo,cons.descricao,cons.pid_consulta);
+    //printf("%d   %s  %d \n",cons.tipo,cons.descricao,cons.pid_consulta);
     sendsignal();
     while(n==0){
         pause();
