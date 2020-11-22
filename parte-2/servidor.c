@@ -90,19 +90,34 @@ void readPedidoCons(){
     int tipo;
     int pid;
     char inf[100];
+    char f[200];
     Consulta c;
     FILE* file = fopen( "PedidoConsulta.txt", "r");
-    fscanf(file,"%d %s %d",&tipo,&inf,&pid);
+    fgets(f,200,file);
+    sscanf(f,"%d,%100[^,]%*c%d",&c.tipo,c.descricao,&c.pid_consulta);
+    //fscanf(file,"%d,\n%99[^\n,]%d",&tipo,&inf,&pid);
     if(checksVagas(pid)){
-         printf("Chegou novo pedido de consulta do tipo %d, descrição %s e PID %d\n",tipo,inf,pid);
-        c.tipo=tipo;
-        c.pid_consulta=pid;
-        *c.descricao=*inf;
-
+        printf("Chegou novo pedido de consulta do tipo %d, descrição %s e PID %d\n",c.tipo,c.descricao,c.pid_consulta);
         setupConsulta(c);
     }
 }
 void statsConsultas(){
+    int t1=0;
+    int t2=0;
+    int t3=0;
+    int p=0;
+     if(!access("StatsConsultas.dat",F_OK)){
+        FILE* file= fopen("StatsConsultas.dat","r");
+        fread( &p, sizeof(p), 1, file );
+        fread( &t1, sizeof(t1), 1, file );
+        fread( &t2, sizeof(t2), 1, file );
+        fread( &t3, sizeof(t3), 1, file );
+        fclose(file);
+        tipo1+=t1;
+        tipo2+=t2;
+        tipo3+=t3;
+        perdidas+=p;
+    } 
     FILE* file= fopen("StatsConsultas.dat","w");
     if ( file ) {
         fwrite(&perdidas, sizeof(perdidas), 1, file);

@@ -9,6 +9,12 @@ int tipoConsValido(int t){
     return -1;
 }
 
+void termina(){
+    printf("Terminando processo...\n");
+    remove(P_CONSULTAS);
+    sleep(1);
+    n=1;
+}
 Consulta getInfo(){
     Consulta consulta;
     printf("Indique qual o tipo da consulta dos seguintes:\n");
@@ -18,38 +24,47 @@ Consulta getInfo(){
     if(tipoConsValido(n)>0){
         consulta.tipo=n;
         printf("Indique a descriçao da consulta:\n");
-        scanf("%100s",&consulta.descricao);
-        //scanf("\n%99[^\n]",&consulta.descricao);
+        //scanf("%100s",&consulta.descricao);
+        scanf("\n%99[^\n]",&consulta.descricao);
         consulta.pid_consulta=getpid();
         return consulta;
     }else{
        fprintf(stderr,"tipo de consulta nao valido\n");
-       exit -1; 
+       termina();
+       exit (-1); 
     }
 }
 void criaConsulta(Consulta c){
-    if(remove("PedidoConsulta.txt")==0);
-    FILE* file = fopen( "PedidoConsulta.txt", "a");
-    fprintf( file, "%d %s %d", c.tipo, c.descricao, c.pid_consulta );
+    if(!access(P_CONSULTAS,F_OK)){
+        printf("Encontra-se uma consulta a decorrer por favor aguarde...\n");
+        alarm(TIME);
+    }
+    FILE* file = fopen( P_CONSULTAS, "a");
+    fprintf( file, "%d,%s,%d", c.tipo, c.descricao, c.pid_consulta );
     fclose(file);
 }
+
+
 int getSrvPid(){
     int pid;
-        FILE* file = fopen( "SrvConsultas.pid", "r");
+    if(!access(SRV_CONSULTAS,F_OK)){
+        FILE* file = fopen( SRV_CONSULTAS, "r");
         fscanf(file,"%d",&pid);
         fclose(file);
         return pid;
+    }else{
+        fprintf(stderr,"Houve um erro no processo, por favor verifique que o servidor foi inicializado, tente outra vez\n");
+        termina();
+        exit(-1);
+    }
+        
 }
 void sendsignal(){
     int pid=getSrvPid();
     kill(pid,SIGUSR1);
     
 }
-void termina(){
-    printf("Terminando processo...\n");
-    sleep(1);
-    n=1;
-}
+
 void trata_sinalURS2(int sinal){
     printf("Consulta não é possível para o processo %d\n",cons.pid_consulta);
     termina();
@@ -57,7 +72,7 @@ void trata_sinalURS2(int sinal){
 void trata_sinalHUP(int sinal){
     printf("Consulta iniciada para o processo %d\n",cons.pid_consulta);
     printf("Consulta a decorrer...\n");
-    remove("PedidoConsulta.txt");
+    
 }
 void trata_sinalTERM(int sinal){
     printf("Consulta concluída para o processo %d\n",cons.pid_consulta);
@@ -65,8 +80,10 @@ void trata_sinalTERM(int sinal){
 }
 void trata_sinalINT(int sinal){
     printf("\nPaciente cancelou o pedido\n");
-    remove("PedidoConsulta.txt");
     termina();
+}
+void trata_alarm(int sinal){
+    criaConsulta(cons);
 }
 
 int main(int argc, char const *argv[]){
@@ -75,6 +92,7 @@ int main(int argc, char const *argv[]){
     signal(SIGHUP,trata_sinalHUP);
     signal(SIGTERM,trata_sinalTERM);
     signal(SIGINT,trata_sinalINT);
+    signal(SIGALRM,trata_alarm);
     criaConsulta(cons);
     //printf("%d   %s  %d \n",cons.tipo,cons.descricao,cons.pid_consulta);
     sendsignal();

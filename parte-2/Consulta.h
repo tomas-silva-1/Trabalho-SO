@@ -8,6 +8,8 @@
 
 #define TIME 10
 #define LISTA_SIZE 10
+#define P_CONSULTAS "PedidoConsulta.txt"
+#define SRV_CONSULTAS "SrvConsultas.pid"
 
 typedef struct {
  int tipo; 
