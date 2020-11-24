@@ -87,16 +87,12 @@ void setupConsulta(Consulta c){
 }
 
 void readPedidoCons(){
-    int tipo;
-    int pid;
-    char inf[100];
     char f[200];
     Consulta c;
     FILE* file = fopen( "PedidoConsulta.txt", "r");
     fgets(f,200,file);
     sscanf(f,"%d,%100[^,]%*c%d",&c.tipo,c.descricao,&c.pid_consulta);
-    //fscanf(file,"%d,\n%99[^\n,]%d",&tipo,&inf,&pid);
-    if(checksVagas(pid)){
+    if(checksVagas(c.pid_consulta)){
         printf("Chegou novo pedido de consulta do tipo %d, descrição %s e PID %d\n",c.tipo,c.descricao,c.pid_consulta);
         setupConsulta(c);
     }

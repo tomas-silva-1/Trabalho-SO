@@ -25,7 +25,6 @@ Consulta getInfo(){
     if(tipoConsValido(n)>0){
         consulta.tipo=n;
         printf("Indique a descriçao da consulta:\n");
-        //scanf("%100s",&consulta.descricao);
         scanf("\n%99[^\n]",&consulta.descricao);
         consulta.pid_consulta=getpid();
         return consulta;
@@ -102,7 +101,6 @@ int main(int argc, char const *argv[]){
     signal(SIGINT,trata_sinalINT);
     signal(SIGALRM,trata_alarm);
     criaConsulta(cons);
-    //printf("%d   %s  %d \n",cons.tipo,cons.descricao,cons.pid_consulta);
     sendsignal();
     while(n==0){
         pause();
