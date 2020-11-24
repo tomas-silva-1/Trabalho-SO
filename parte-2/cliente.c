@@ -3,6 +3,7 @@
 
 Consulta cons;
 int n=0;
+int secure=0;
 
 int tipoConsValido(int t){
     if (t==1 || t==2 || t==3 ) return 1;
@@ -72,11 +73,18 @@ void trata_sinalURS2(int sinal){
 void trata_sinalHUP(int sinal){
     printf("Consulta iniciada para o processo %d\n",cons.pid_consulta);
     printf("Consulta a decorrer...\n");
+    secure++;
     
 }
 void trata_sinalTERM(int sinal){
+    if(secure==1){
     printf("Consulta concluída para o processo %d\n",cons.pid_consulta);
     termina();
+    }else{
+        printf("erro durante o processo");
+        termina();
+        exit(-1);
+    }
 }
 void trata_sinalINT(int sinal){
     printf("\nPaciente cancelou o pedido\n");

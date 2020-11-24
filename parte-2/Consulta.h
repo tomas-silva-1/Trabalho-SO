@@ -3,6 +3,8 @@
 #include <string.h>
 #include <signal.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #ifndef __CONSULTA_H__
 #define __CONSULTA_H__
 
