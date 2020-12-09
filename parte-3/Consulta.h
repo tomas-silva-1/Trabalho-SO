@@ -8,7 +8,7 @@
 #ifndef __CONSULTA_H__
 #define __CONSULTA_H__
 
-#define TIME 10
+#define DURACAO 10
 #define LISTA_SIZE 10
 #define P_CONSULTAS "PedidoConsulta.txt"
 #define SRV_CONSULTAS "SrvConsultas.pid"
