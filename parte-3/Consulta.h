@@ -5,11 +5,29 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/ipc.h>
+#include <sys/types.h>
+#include <sys/shm.h>
+#include <sys/sem.h>
+#include <sys/msg.h>
+
+#define exit_on_error(s,m) if (s<0) {perror(m); exit(1);}
+#define exit_on_null(s,m) if (s==NULL) { perror(m); exit(1); }
+
+#define IPC_KEY 0x0a92419
+#define IPC_KEY2 0x0b92419
+
+#define exit_on_error(s,m) if (s<0) { perror(m); exit(1);}
+
+#define MSGKEY 0x0a92419 
+#define MSGTYP1 1
+
 #ifndef __CONSULTA_H__
 #define __CONSULTA_H__
 
 #define DURACAO 10
 #define LISTA_SIZE 10
+#define PERM 0600
 #define P_CONSULTAS "PedidoConsulta.txt"
 #define SRV_CONSULTAS "SrvConsultas.pid"
 
@@ -19,5 +37,18 @@ typedef struct {
  int pid_consulta; 
  int status;
 } Consulta;
+
+typedef struct{
+    int tipo1;
+    int tipo2;
+    int tipo3;
+    int perdidas;
+}Contador;
+
+typedef struct {
+    long tipo;
+    Consulta consulta;
+}mensagem;
+
 
 #endif

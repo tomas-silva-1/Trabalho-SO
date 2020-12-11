@@ -2,6 +2,8 @@
 
 Consulta cons;
 int n=1;
+int msgId;
+mensagem m;
 
 int tipoConsValido(int t){
     if (t==1 || t==2 || t==3 ) return 1;
@@ -28,11 +30,21 @@ Consulta getInfo(){
        exit (-1); 
     }
 }
-
+void enviaConsulta(Consulta c){
+    int status;
+    msgId = msgget( MSGKEY, 0 );
+        exit_on_error(msgId, "Erro no msgget.");
+    m.tipo= MSGTYP1;
+    m.consulta=c;
+    status = msgsnd(msgId, &m, sizeof(m.consulta), 0);
+        exit_on_error(status, "erro ao enviar");
+}
 int main(int argc, char const *argv[]){
+    int status;
     cons = getInfo();
-
+    enviaConsulta(cons);
     while (n==1){
+
         pause();
     }
     
