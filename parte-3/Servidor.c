@@ -7,10 +7,6 @@ int msgId;
 
 Consulta lista_consultas[LISTA_SIZE];   // atençao à marcaçao das consultas nas salas e aos contadores
 
-/* int tipo1=0;
-int tipo2=0;
-int tipo3=0;
-int perdidas=0; */
 void initializer(Consulta* c){
     for(int i=0;i<LISTA_SIZE;i++){
         c[i].tipo=-1;
@@ -45,16 +41,64 @@ void iniciaSHM(){
             tipo->perdidas=0;
     }
     
-    printf("Foi iniciada a SHM");
+    printf("Foi iniciada a SHM\n");
     }
 void startMSGQ(){
     msgId = msgget( MSGKEY, PERM | IPC_CREAT );
         exit_on_error(msgId, "Erro no msgget");
     }
-receberConsulta(Consulta cons){
-    printf("Consulta recebida");
+void counter(int tipo){
+    Contador* memoria=(Contador*) shmat(shmId2, NULL, 0);
+    switch (tipo){
+    case 1:
+        memoria.tipo1++;
+        break;
+    case 2:
+        tipo2++;
+        break;
+    case 3:
+        tipo3++;
+        break;
+    default:
+        printf("tipo de consulta nao valida");
+        break;
+    }
+}
+int getSala(){
+    Consulta* c= (Consulta*) shmat(shmId, NULL, 0);
+    for(int i=0;i<LISTA_SIZE;i++){
+        if(c[i].tipo==-1){
+            return i;
+        }
+    }
+    return -1;
+}
+void enviaMensagem(Consulta cons){
+
+}
+void recusaConsulta(Consulta cons){
+    cons.status=4;
+    enviaMensagem(cons);
+    counter(cons.status);
+}
+int iniciaConsulta(Consulta cons){
+    pid_t child = fork();
+    if ( child == 0 ) {
+        int sala=getSala();
+        if(sala==-1){
+            printf("Lista de consultas cheia");
+            recusaConsulta(cons);
+        }else{
+
+        }
+    }
+    }
+void receberConsulta(Consulta cons){
+    printf("Chegou novo pedido de consulta do tipo %d, descrição %s e PID %d\n",cons.tipo,cons.descricao,cons.pid_consulta);
+    iniciaConsulta(cons);
 
     }
+
 
 
 int main(int argc, char const *argv[]){
@@ -65,6 +109,8 @@ int main(int argc, char const *argv[]){
     mensagem m;
     while (n==1){
         status = msgrcv(msgId, &m, sizeof(m.consulta), MSGTYP1, 0);
-        printf("Chegou novo pedido de consulta do tipo %d, descrição %s e PID %d",m.consulta.tipo,m.consulta.descricao,m.consulta.pid_consulta);
-        pause();
+        receberConsulta(m.consulta);
+        
+        //pause();
     }
+}

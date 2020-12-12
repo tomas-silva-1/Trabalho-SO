@@ -3,11 +3,16 @@
 Consulta cons;
 int n=1;
 int msgId;
-mensagem m;
+
 
 int tipoConsValido(int t){
     if (t==1 || t==2 || t==3 ) return 1;
     return -1;
+}
+void termina(){
+    printf("Terminando processo...\n");
+    sleep(1);
+    exit(0);
 }
 
 
@@ -32,6 +37,7 @@ Consulta getInfo(){
 }
 void enviaConsulta(Consulta c){
     int status;
+    mensagem m;
     msgId = msgget( MSGKEY, 0 );
         exit_on_error(msgId, "Erro no msgget.");
     m.tipo= MSGTYP1;
@@ -43,6 +49,7 @@ int main(int argc, char const *argv[]){
     int status;
     cons = getInfo();
     enviaConsulta(cons);
+    printf("chega a enviar\n");
     while (n==1){
 
         pause();

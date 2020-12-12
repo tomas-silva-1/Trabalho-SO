@@ -16,20 +16,14 @@
 
 #define IPC_KEY 0x0a92419
 #define IPC_KEY2 0x0b92419
-
-#define exit_on_error(s,m) if (s<0) { perror(m); exit(1);}
-
 #define MSGKEY 0x0a92419 
 #define MSGTYP1 1
-
-#ifndef __CONSULTA_H__
-#define __CONSULTA_H__
-
 #define DURACAO 10
 #define LISTA_SIZE 10
 #define PERM 0600
-#define P_CONSULTAS "PedidoConsulta.txt"
-#define SRV_CONSULTAS "SrvConsultas.pid"
+
+#ifndef __CONSULTA_H__
+#define __CONSULTA_H__
 
 typedef struct {
  int tipo; 
