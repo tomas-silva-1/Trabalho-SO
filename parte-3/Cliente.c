@@ -3,6 +3,7 @@
 Consulta cons;
 int n=1;
 int msgId;
+int iniciada=0;
 
 
 int tipoConsValido(int t){
@@ -35,24 +36,66 @@ Consulta getInfo(){
        exit (-1); 
     }
 }
-void enviaConsulta(Consulta c){
+void enviaConsulta(){
     int status;
     mensagem m;
     msgId = msgget( MSGKEY, 0 );
         exit_on_error(msgId, "Erro no msgget.");
     m.tipo= MSGTYP1;
-    m.consulta=c;
+    m.consulta=cons;
     status = msgsnd(msgId, &m, sizeof(m.consulta), 0);
         exit_on_error(status, "erro ao enviar");
 }
+void trataMensagens(int status){
+    switch (status){
+    case 2:
+        printf("Consulta iniciada para o processo %d\n", cons.pid_consulta);
+        iniciada=1;
+        break;
+    case 3:
+        if(iniciada==1){
+            printf("Consulta concluída para o processo %d\n", cons.pid_consulta);
+            exit(0);
+        }else{
+            printf("Erro na conclusão da consulta\n");
+            exit(-1);
+        }
+        break;
+    case 4:
+        printf("Consulta não é possível para o processo %d\n", cons.pid_consulta);
+        exit(0);
+        break;
+    default:
+        printf("status nao valido\n");
+        exit(-1);
+        break;
+    }
+}
+void cancelaConsulta(){
+    int status;
+    mensagem m;
+    msgId = msgget( MSGKEY, 0 );
+        exit_on_error(msgId, "Erro no msgget.");
+    m.tipo= cons.pid_consulta;
+    m.consulta=cons;
+    status = msgsnd(msgId, &m, sizeof(m.consulta), 0);
+        exit_on_error(status, "erro ao enviar");
+}
+void trata_sinalINT(int sinal){
+    printf("Paciente cancelou o pedido\n");
+    cons.status=5;
+    cancelaConsulta();
+    exit(0);
+}
 int main(int argc, char const *argv[]){
     int status;
+    mensagem m;
     cons = getInfo();
-    enviaConsulta(cons);
-    printf("chega a enviar\n");
+    enviaConsulta();
+    signal(SIGINT,trata_sinalINT);
     while (n==1){
-
-        pause();
+        status = msgrcv(msgId, &m, sizeof(m.consulta), cons.pid_consulta, 0);
+        trataMensagens(m.consulta.status);
     }
     
 }
