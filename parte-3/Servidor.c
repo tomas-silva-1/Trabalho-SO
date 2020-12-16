@@ -6,32 +6,41 @@ int shmId2;
 int msgId;
 int semId;
 
-Consulta lista_consultas[LISTA_SIZE];   // atençao à marcaçao das consultas nas salas e aos contadores
-
 void initializer(Consulta* c){
     for(int i=0;i<LISTA_SIZE;i++){
         c[i].tipo=-1;
     }
 }
-int checkSHM1(){
-    int temp =  shmget( IPC_KEY, LISTA_SIZE*sizeof(Consulta) , IPC_CREAT | IPC_EXCL | PERM );
-     if(temp>0) return 0;
-        return 1;
+int checkSHM1(){        //verifica se existe shm1
+    int temp =  shmget( IPC_KEY, LISTA_SIZE*sizeof(Consulta) , 0 | PERM );
+    printf("%d",temp);
+     if(temp>0){
+         printf("existe shm1\n");
+         return temp;
+     } 
+        return 0;
 }
-int checkSHM2(){
-    int temp =  shmget( IPC_KEY2, 4*sizeof(n) , IPC_CREAT | IPC_EXCL | PERM );
-    if(temp>0) return 0;
-        return 1;
+int checkSHM2(){        //verifica se existe shm2
+    int temp =  shmget( IPC_KEY2, sizeof(Contador) , 0 | PERM );
+    if(temp>0) {
+        printf(" existe shm2\n");
+        return temp;
+    }
+        return 0;
 }
-void iniciaSHM(){
-    //if(checkSHM1()){
-        shmId = shmget( IPC_KEY, LISTA_SIZE*sizeof(Consulta) , IPC_CREAT | PERM );
+void iniciaSHM(){       //inicia shm1 e shm2 se nao existirem
+    int temp1=checkSHM1();
+    int temp2= checkSHM2();
+    if(temp1==0){
+        shmId = shmget( IPC_KEY, LISTA_SIZE*sizeof(Consulta) , IPC_CREAT | PERM );      
             exit_on_error(shmId, "shmget");
         Consulta* c= (Consulta*) shmat(shmId, NULL, 0);
             exit_on_null(c, "shmat");
         initializer(c);
-   // }
-   // if(checkSHM2()){
+    }
+    else shmId=temp1;
+
+    if(temp2==0){
         shmId2= shmget( IPC_KEY2, sizeof(Contador) , IPC_CREAT | PERM );
             exit_on_error(shmId2, "shmget");
         Contador* tipo=(Contador*) shmat(shmId2, NULL, 0);
@@ -40,30 +49,31 @@ void iniciaSHM(){
             tipo->tipo2=0;
             tipo->tipo3=0;
             tipo->perdidas=0;
- //   }
+    }
+    else shmId2= temp2;
     
     printf("Foi iniciada a SHM\n");
 }
-void startSEM(){
+void startSEM(){            // inicia semaforo
     semId = semget(SEMKEY, 2, IPC_CREAT | PERM );
     exit_on_error(semId, "algo correu mal com o semget");
     
     int status = semctl(semId, 0, SETVAL, 1);
     exit_on_error(status, "semctl SETVAL failed");
 }
-void upSEM(){
+void upSEM(){ //sobe valor do semaforo
     int res = semop(semId, &UP, 1);
     exit_on_error(res, "erro no UP");
 }
-void downSEM(){
+void downSEM(){     //desce semaforo
     int res = semop(semId, &DOWN, 1);
     exit_on_error(res, "erro no DOWN");
 }
-void startMSGQ(){
+void startMSGQ(){  //inicia messagequeue
     msgId = msgget( MSGKEY, PERM | IPC_CREAT );
         exit_on_error(msgId, "Erro no msgget");
 }
-void counter(int tipo){
+void counter(int tipo){     //conta o tipo das consultas
     downSEM();
     Contador* memoria=(Contador*) shmat(shmId2, NULL, 0);
     switch (tipo){
@@ -85,7 +95,7 @@ void counter(int tipo){
     }
     upSEM();
 }
-int getSala(){
+int getSala(){      // vai buscar a primeira sala vazia da shm1
     downSEM();
     Consulta* c= (Consulta*) shmat(shmId, NULL, 0);
     for(int i=0;i<LISTA_SIZE;i++){
@@ -97,7 +107,7 @@ int getSala(){
         upSEM();
     return -1;
 }
-void enviaMensagem(Consulta cons){
+void enviaMensagem(Consulta cons){      //envia mensagem ao cliente
     int status;
     mensagem m;
     msgId = msgget( MSGKEY, 0 );
@@ -107,12 +117,12 @@ void enviaMensagem(Consulta cons){
     status = msgsnd(msgId, &m, sizeof(m.consulta), 0);
         exit_on_error(status, "erro ao enviar");
 }
-void recusaConsulta(Consulta cons){
+void recusaConsulta(Consulta cons){     //recusa a consulta se não houver vaga
     cons.status=4;
     enviaMensagem(cons);
     counter(cons.status);
 }
-void doConsulta(Consulta cons, int sala){
+void doConsulta(Consulta cons, int sala){ //coloca a consulta na sala
     downSEM();
     Consulta* c= (Consulta*) shmat(shmId, NULL, 0);
     c[sala]=cons;
@@ -122,7 +132,7 @@ void doConsulta(Consulta cons, int sala){
     cons.status=2;
     enviaMensagem(cons);
 }
-void cleanSala(int sala){
+void cleanSala(int sala){ // limpa a sala(tira a consulta)
     downSEM();
     Consulta cons;
     cons.tipo=-1;
@@ -130,7 +140,7 @@ void cleanSala(int sala){
     c[sala]=cons;
     upSEM();
 }
-int iniciaConsulta(Consulta cons){
+int iniciaConsulta(Consulta cons){ // inicializa a consulta
     int temp=0;
     int status;
     mensagem m;
@@ -138,15 +148,15 @@ int iniciaConsulta(Consulta cons){
     if ( child == 0 ) {
         int sala=getSala();
         if(sala==-1){
-            printf("Lista de consultas cheia\n");
+            printf("Lista de consultas cheia\n"); 
             recusaConsulta(cons);
         }else{
             doConsulta(cons,sala);
-            while(temp<DURACAO){
+            while(temp<DURACAO){  //3.3.3 iterador corre ate 10 e cada iteraçao chama o megrcv com o IPC_NOWAIT o que nao bloqueia o processo e a seguir um sleep de 1s
                 status = msgrcv(msgId, &m, sizeof(m.consulta),cons.pid_consulta, IPC_NOWAIT);
                     if(status>0){
                         printf("Consulta cancelada pelo utilizador %d\n",m.consulta.pid_consulta);
-                        exit(0);  
+                        exit(0);
                 }
                 sleep(1);
                 temp++;
@@ -158,12 +168,13 @@ int iniciaConsulta(Consulta cons){
             exit(0);
         }
     }
+    else signal (SIGCHLD, SIG_IGN);
 }
-void receberConsulta(Consulta cons){
+void receberConsulta(Consulta cons){        //trata da inicializaçao da consulta
     printf("Chegou novo pedido de consulta do tipo %d, descrição %s e PID %d\n",cons.tipo,cons.descricao,cons.pid_consulta);
     iniciaConsulta(cons);
 }
-void trata_sinalINT(int sinal){
+void trata_sinalINT(int sinal){         //trata do sinal e imprime as estatisticas
     downSEM();
     Contador* memoria=(Contador*) shmat(shmId2, NULL, 0);
     printf("\nNº de Consultas Normais: %d\n",memoria->tipo1);
@@ -188,7 +199,5 @@ int main(int argc, char const *argv[]){
     while (n==1){
         status = msgrcv(msgId, &m, sizeof(m.consulta), MSGTYP1, 0);
         receberConsulta(m.consulta);
-        
-        //pause();
     }
 }

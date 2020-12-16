@@ -16,13 +16,14 @@
 
 #define IPC_KEY 0x0a92419
 #define IPC_KEY2 0x0b92419
-#define MSGKEY 0x0a92419 
+#define MSGKEY 0x0a92419
+#define SEMKEY 0x0a92419 
 #define MSGTYP1 1
 #define MSGTYPC 5
 #define DURACAO 10
 #define LISTA_SIZE 10
 #define PERM 0600
-#define SEMKEY 0x0a92419
+
 
 #ifndef __CONSULTA_H__
 #define __CONSULTA_H__
