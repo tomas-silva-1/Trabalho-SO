@@ -5,7 +5,6 @@ int n=1;
 int msgId;
 int iniciada=0;
 
-
 int tipoConsValido(int t){
     if (t==1 || t==2 || t==3 ) return 1;
     return -1;
@@ -15,8 +14,6 @@ void termina(){
     sleep(1);
     exit(0);
 }
-
-
 Consulta getInfo(){
     Consulta consulta;
     printf("Indique qual o tipo da consulta dos seguintes:\n");
@@ -96,6 +93,5 @@ int main(int argc, char const *argv[]){
     while (n==1){
         status = msgrcv(msgId, &m, sizeof(m.consulta), cons.pid_consulta, 0);
         trataMensagens(m.consulta.status);
-    }
-    
+    }    
 }

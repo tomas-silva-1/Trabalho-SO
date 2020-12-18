@@ -73,10 +73,10 @@ void startMSGQ(){  //inicia messagequeue
     msgId = msgget( MSGKEY, PERM | IPC_CREAT );
         exit_on_error(msgId, "Erro no msgget");
 }
-void counter(int tipo){     //conta o tipo das consultas
+void counter(int tipo_status){     //conta o tipo das consultas
     downSEM();
     Contador* memoria=(Contador*) shmat(shmId2, NULL, 0);
-    switch (tipo){
+    switch (tipo_status){
     case 1:
         memoria->tipo1+=1;
         break;
@@ -155,8 +155,12 @@ int iniciaConsulta(Consulta cons){ // inicializa a consulta
             while(temp<DURACAO){  //3.3.3 iterador corre ate 10 e cada iteraçao chama o megrcv com o IPC_NOWAIT o que nao bloqueia o processo e a seguir um sleep de 1s
                 status = msgrcv(msgId, &m, sizeof(m.consulta),cons.pid_consulta, IPC_NOWAIT);
                     if(status>0){
-                        printf("Consulta cancelada pelo utilizador %d\n",m.consulta.pid_consulta);
-                        exit(0);
+                        if(m.consulta.status==5){
+                            printf("Consulta cancelada pelo utilizador %d\n",m.consulta.pid_consulta);
+                            exit(0);
+                        }else{
+                            printf("Consulta não cancelada com sucesso %d\n",m.consulta.pid_consulta);
+                        }                       
                 }
                 sleep(1);
                 temp++;
@@ -186,8 +190,6 @@ void trata_sinalINT(int sinal){         //trata do sinal e imprime as estatistic
     sleep(1);
     exit(0);
 }
-
-
 int main(int argc, char const *argv[]){
     int status;
     printf("Servidor Cliniq-IUL...\n");

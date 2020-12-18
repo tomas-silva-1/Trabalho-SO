@@ -10,10 +10,8 @@
 #include <sys/shm.h>
 #include <sys/sem.h>
 #include <sys/msg.h>
-
 #define exit_on_error(s,m) if (s<0) {perror(m); exit(1);}
-#define exit_on_null(s,m) if (s==NULL) { perror(m); exit(1); }
-
+#define exit_on_null(s,m) if (s==NULL) { perror(m); exit(1);}
 #define IPC_KEY 0x0a92419
 #define IPC_KEY2 0x0b92419
 #define MSGKEY 0x0a92419
@@ -23,8 +21,6 @@
 #define DURACAO 10
 #define LISTA_SIZE 10
 #define PERM 0600
-
-
 #ifndef __CONSULTA_H__
 #define __CONSULTA_H__
 
@@ -58,7 +54,5 @@ struct sembuf DOWN = {
     .sem_op = -1,
     .sem_flg = 0
 };
-
-
 
 #endif
