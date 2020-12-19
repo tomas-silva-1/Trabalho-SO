@@ -13,9 +13,7 @@ void initializer(Consulta* c){
 }
 int checkSHM1(){        //verifica se existe shm1
     int temp =  shmget( IPC_KEY, LISTA_SIZE*sizeof(Consulta) , 0 | PERM );
-    printf("%d",temp);
      if(temp>0){
-         printf("existe shm1\n");
          return temp;
      } 
         return 0;
@@ -133,9 +131,9 @@ void doConsulta(Consulta cons, int sala){ //coloca a consulta na sala
     enviaMensagem(cons);
 }
 void cleanSala(int sala){ // limpa a sala(tira a consulta)
-    downSEM();
     Consulta cons;
     cons.tipo=-1;
+    downSEM();
     Consulta* c= (Consulta*) shmat(shmId, NULL, 0);
     c[sala]=cons;
     upSEM();
@@ -157,6 +155,7 @@ int iniciaConsulta(Consulta cons){ // inicializa a consulta
                     if(status>0){
                         if(m.consulta.status==5){
                             printf("Consulta cancelada pelo utilizador %d\n",m.consulta.pid_consulta);
+                            cleanSala(sala);
                             exit(0);
                         }else{
                             printf("Consulta não cancelada com sucesso %d\n",m.consulta.pid_consulta);
@@ -172,20 +171,18 @@ int iniciaConsulta(Consulta cons){ // inicializa a consulta
             exit(0);
         }
     }
-    else signal (SIGCHLD, SIG_IGN);
+    else signal (SIGCHLD, SIG_IGN);//mata zombies
 }
 void receberConsulta(Consulta cons){        //trata da inicializaçao da consulta
     printf("Chegou novo pedido de consulta do tipo %d, descrição %s e PID %d\n",cons.tipo,cons.descricao,cons.pid_consulta);
     iniciaConsulta(cons);
 }
 void trata_sinalINT(int sinal){         //trata do sinal e imprime as estatisticas
-    downSEM();
     Contador* memoria=(Contador*) shmat(shmId2, NULL, 0);
     printf("\nNº de Consultas Normais: %d\n",memoria->tipo1);
     printf("Nº de Consultas COVID19: %d\n",memoria->tipo2);
     printf("Nº de Consultas Urgente: %d\n",memoria->tipo3);
     printf("Nº de Consultas Perdidas: %d\n",memoria->perdidas);
-    upSEM();
     printf("Servidor a terminar...\n");
     sleep(1);
     exit(0);
